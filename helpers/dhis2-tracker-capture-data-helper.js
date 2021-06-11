@@ -25,7 +25,7 @@ async function getTrackerCaptureDataFromServer(
         headers,
         url,
         batchSize,
-        filters
+        `${filters}&totalPages=true`
       );
     let count = 0;
     for (const paginationFilter of paginationFilters) {
