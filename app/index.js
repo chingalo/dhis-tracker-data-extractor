@@ -4,6 +4,7 @@ const { sourceConfig, organisationUnitColumnConfigs } = require('../configs');
 
 const logsHelper = require('../helpers/logs.helper');
 const dhis2UtilHelper = require('../helpers/dhis2-util.helper');
+const dhis2organisationUnitHelper = require('../helpers/dhis2-organisation-unit.helper');
 
 async function startAppProcess() {
   try {
@@ -16,13 +17,11 @@ async function startAppProcess() {
       username,
       password
     );
-    console.log({
-      og: organisationUnitColumnConfigs,
-      groupByKey,
-      locationColumnConfigs,
-      serverUrl,
-      headers,
-    });
+    const organisationUnits =
+      await dhis2organisationUnitHelper.getAllOrganisationUnitsFromServer(
+        headers,
+        serverUrl
+      );
   } catch (error) {
     await logsHelper.addLogs(
       'error',
