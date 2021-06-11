@@ -1,4 +1,7 @@
-const _ = require('lodash');
+const { flattenDeep } = require('lodash');
+
+const httpHelper = require('./http.helper');
+const logsHelper = require('./logs.helper');
 
 function uid() {
   const letters = 'abcdefghijklmnopqrstuvwxyz' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -21,6 +24,34 @@ function getHttpAuthorizationHeader(username, password) {
   };
 }
 
+async function getDhis2ResourcePaginationFromServer(
+  headers,
+  resourceUrl,
+  pageSize = 100,
+  filters = ''
+) {
+  const paginationFilters = [];
+  try {
+    const url =
+      filters != ''
+        ? `${resourceUrl}?fields=none&pageSize=1&${filters}`
+        : `${resourceUrl}?fields=none&pageSize=1`;
+    const response = await httpHelper.getHttp(headers, url);
+    const pager = response.pager || {};
+    const total = pager.total || pageSize;
+    for (let page = 1; page <= Math.ceil(total / pageSize); page++) {
+      paginationFilters.push(`pageSize=${pageSize}&page=${page}`);
+    }
+  } catch (error) {
+    await logsHelper.addLogs(
+      'error',
+      error.message || error,
+      'getDhis2ResourcePaginationFromServer'
+    );
+  }
+  return flattenDeep(paginationFilters);
+}
+
 function getFormattedDate(date) {
   let dateObject = new Date(date);
   if (isNaN(dateObject.getDate())) {
@@ -40,4 +71,5 @@ module.exports = {
   uid,
   getHttpAuthorizationHeader,
   getFormattedDate,
+  getDhis2ResourcePaginationFromServer,
 };
