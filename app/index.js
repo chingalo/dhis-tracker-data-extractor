@@ -1,4 +1,13 @@
-const { sortBy, take, map, join, flattenDeep, uniq } = require('lodash');
+const {
+  sortBy,
+  take,
+  map,
+  join,
+  flattenDeep,
+  uniq,
+  groupBy,
+  keys,
+} = require('lodash');
 
 const { sourceConfig, organisationUnitColumnConfigs } = require('../configs');
 
@@ -8,9 +17,13 @@ const dhis2organisationUnitHelper = require('../helpers/dhis2-organisation-unit.
 const dhis2ProgramHelper = require('../helpers/dhis2-program.helper');
 const dhis2TrackerCaptureDataHelper = require('../helpers/dhis2-tracker-capture-data-helper');
 const dhis2TrackerExcelFileHelper = require('../helpers/dhis2-tracker-excel-file-helper');
+const excelFileUtilHelper = require('../helpers/excel-file-util.helper');
+const fileManipulationHelper = require('../helpers/file-manipulation.helper');
 
 async function startAppProcess() {
   try {
+    const folderPath = `${fileManipulationHelper.fileDir}/raw-data`;
+    await fileManipulationHelper.intiateFilesDirectories(folderPath);
     const groupByKey = getGroupByKey();
     const locationColumnConfigs = sortBy(organisationUnitColumnConfigs, [
       'level',
@@ -30,7 +43,7 @@ async function startAppProcess() {
         headers,
         serverUrl
       );
-    for (const program of [programs[0]]) {
+    for (const program of programs) {
       const batchSize = 500;
       const programMetadata =
         await dhis2ProgramHelper.discoveringTrackerProgramMetadata(
@@ -54,8 +67,23 @@ async function startAppProcess() {
             programMetadata,
             program.id
           );
-        if (excelJsonData.length > 0)
-          console.log(JSON.stringify(excelJsonData));
+        if (excelJsonData.length > 0) {
+          await logsHelper.addLogs(
+            'info',
+            `Generating excel files for program :: ${program.name}`,
+            'startAppProcess'
+          );
+          const groupedData = groupBy(excelJsonData, groupByKey);
+          for (const groupKey of keys(groupedData)) {
+            const date = dhis2UtilHelper.getFormattedDate(new Date());
+            const fileName = `[${groupKey}]${program.name} ${date}.xlsx`;
+            const excelFilePath = `${folderPath}/${fileName}`;
+            await excelFileUtilHelper.writeToMultipleSheetExcelFile(
+              { list: groupedData[groupKey] },
+              excelFilePath
+            );
+          }
+        }
       }
     }
   } catch (error) {
