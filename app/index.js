@@ -5,6 +5,7 @@ const { sourceConfig, organisationUnitColumnConfigs } = require('../configs');
 const logsHelper = require('../helpers/logs.helper');
 const dhis2UtilHelper = require('../helpers/dhis2-util.helper');
 const dhis2organisationUnitHelper = require('../helpers/dhis2-organisation-unit.helper');
+const dhis2ProgramHelper = require('../helpers/dhis2-program.helper');
 
 async function startAppProcess() {
   try {
@@ -22,6 +23,20 @@ async function startAppProcess() {
         headers,
         serverUrl
       );
+    const programs =
+      await dhis2ProgramHelper.discoveringTrackerProgramsFromServer(
+        headers,
+        serverUrl
+      );
+    for (const program of programs) {
+      const programMetadata =
+        await dhis2ProgramHelper.discoveringTrackerProgramMetadata(
+          headers,
+          serverUrl,
+          program
+        );
+      console.log(programMetadata);
+    }
   } catch (error) {
     await logsHelper.addLogs(
       'error',
