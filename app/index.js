@@ -6,6 +6,7 @@ const logsHelper = require('../helpers/logs.helper');
 const dhis2UtilHelper = require('../helpers/dhis2-util.helper');
 const dhis2organisationUnitHelper = require('../helpers/dhis2-organisation-unit.helper');
 const dhis2ProgramHelper = require('../helpers/dhis2-program.helper');
+const dhis2TrackerCaptureDataHelper = require('../helpers/dhis2-tracker-capture-data-helper');
 
 async function startAppProcess() {
   try {
@@ -28,14 +29,24 @@ async function startAppProcess() {
         headers,
         serverUrl
       );
-    for (const program of programs) {
+    for (const program of [programs[0]]) {
+      const batchSize = 500;
       const programMetadata =
         await dhis2ProgramHelper.discoveringTrackerProgramMetadata(
           headers,
           serverUrl,
           program
         );
-      console.log(programMetadata);
+      const trackerCaptureData =
+        await dhis2TrackerCaptureDataHelper.getTrackerCaptureDataFromServer(
+          headers,
+          serverUrl,
+          program.id,
+          batchSize
+        );
+      if (trackerCaptureData.length > 0) {
+        console.log(trackerCaptureData.length);
+      }
     }
   } catch (error) {
     await logsHelper.addLogs(

@@ -27,7 +27,6 @@ async function discoveringTrackerProgramsFromServer(headers, serverUrl) {
 async function discoveringTrackerProgramMetadata(headers, serverUrl, program) {
   let programMetadata = {};
   try {
-    console.log(program);
     const { id: programId, name: programName } = program;
     await logsHelper.addLogs(
       'info',

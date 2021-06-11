@@ -1,5 +1,8 @@
 const { flattenDeep } = require('lodash');
 
+const httpHelper = require('./http.helper');
+const logsHelper = require('./logs.helper');
+
 function uid() {
   const letters = 'abcdefghijklmnopqrstuvwxyz' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const allowedChars = '0123456789' + letters;
