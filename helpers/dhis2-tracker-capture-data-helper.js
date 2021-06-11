@@ -1,4 +1,4 @@
-const { flattenDeep, uniq, map, find } = require('lodash');
+const { flattenDeep, uniq, map, find, filter } = require('lodash');
 
 const httpHelper = require('./http.helper');
 const logsHelper = require('./logs.helper');

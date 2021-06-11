@@ -7,6 +7,7 @@ const dhis2UtilHelper = require('../helpers/dhis2-util.helper');
 const dhis2organisationUnitHelper = require('../helpers/dhis2-organisation-unit.helper');
 const dhis2ProgramHelper = require('../helpers/dhis2-program.helper');
 const dhis2TrackerCaptureDataHelper = require('../helpers/dhis2-tracker-capture-data-helper');
+const dhis2TrackerExcelFileHelper = require('../helpers/dhis2-tracker-excel-file-helper');
 
 async function startAppProcess() {
   try {
@@ -45,7 +46,16 @@ async function startAppProcess() {
           batchSize
         );
       if (trackerCaptureData.length > 0) {
-        console.log(trackerCaptureData.length);
+        const excelJsonData =
+          await dhis2TrackerExcelFileHelper.getExcelJsonData(
+            organisationUnits,
+            locationColumnConfigs,
+            trackerCaptureData,
+            programMetadata,
+            program.id
+          );
+        if (excelJsonData.length > 0)
+          console.log(JSON.stringify(excelJsonData));
       }
     }
   } catch (error) {
