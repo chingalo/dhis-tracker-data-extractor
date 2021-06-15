@@ -7,6 +7,7 @@ const {
   uniq,
   groupBy,
   keys,
+  split,
 } = require('lodash');
 
 const { sourceConfig, organisationUnitColumnConfigs } = require('../configs');
@@ -76,7 +77,8 @@ async function startAppProcess() {
           const groupedData = groupBy(excelJsonData, groupByKey);
           for (const groupKey of keys(groupedData)) {
             const date = dhis2UtilHelper.getFormattedDate(new Date());
-            const fileName = `[${groupKey}]${program.name} ${date}.xlsx`;
+            const programName = join(split(`${program.name}`, '/'), '_');
+            const fileName = `[${groupKey}]${programName} ${date}.xlsx`;
             const excelFilePath = `${folderPath}/${fileName}`;
             await excelFileUtilHelper.writeToMultipleSheetExcelFile(
               { list: groupedData[groupKey] },
